@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+
+<html>
+  <link rel="stylesheet" type="text/css" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css?family=Roboto+Slab&display=swap" rel="stylesheet">
+  
+  <script
+    src="https://unpkg.com/react@16/umd/react.development.js"
+    crossorigin
+  ></script>
+  <script
+    src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"
+    crossorigin
+  ></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+  <body>
+    <div id="root"></div>
+  </body>
+
+  <script type="text/babel">
+  
+    function App() {
+      
+      const index = +window.location.search.substr(1) || 1;
+      const [data, setData] = React.useState([]);
+      const [destinations, setDestinations] = React.useState([]);
+      const [page, setPage] = React.useState(index);
+      const [pageOptions, setPageOptions] = React.useState({ currentPage: "" });
+      const [filterOptions, setFilterOptions] = React.useState([]);
+   
+      const [filter, setFilter] = React.useState("");
+      const [filteredData, setFilteredData] = React.useState([]);
+
+      const [editToggle, setEditToggle] = React.useState(false);
+      const [viewToggle, setViewToggle] = React.useState(false);
+      const [toggleDest, setToggleDest] = React.useState(null);
+      const [sreateToggle, setSreateToggle] = React.useState(false);
+      const [toogleModal , setToogleModal] = React.useState(false);
+      const [edittoogleModal , seteditToogleModal] = React.useState(false);
+      const [Modal , setModal] = React.useState(true);
+      const [dirModal , setdirModal] = React.useState(true);
+      
+    
+      React.useEffect(() => {
+        fetch("/api/items", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ page })
+        })
+          .then(res => res.json())
+          .then(res => {
+            console.log(res);
+
+            setPageOptions(res);
+            setData(res.items);
+            setFilteredData(res.items);
+            setFilterOptions(
+              res.items.reduce((a, e) => {
+                return a.concat(e.category);
+              }, [])
+            );
+          });
+
+        fetch("/api/destinations")
+          .then(res => res.json())
+          .then(res => {
+            console.log(res);
+            setDestinations(res.destinations);
+          });
+      }, []);
+
+      React.useEffect(() => {
+        setFilteredData(
+          data.filter(e => filter === "-All-" || e.category === filter)
+        );
+      }, [filter]);
+
+      const handleChange = {
+        filter: e => {
+          setFilter(e.currentTarget.value);
+        }
+      };
+
+      const handleClick = {
+        preview: e => {
+          setViewToggle(e);
+          setModal(true)
+        },
+        edit: e => {
+          seteditToogleModal(true),
+          setEditToggle(e);
+        },
+        close:e=>{
+          e.preventDefault();
+        setToogleModal(false);
+          setSreateToggle(e);
+        },
+        editclose:e=>{
+          e.preventDefault();
+        seteditToogleModal(false);
+        },
+        closeModal:e=>{
+          e.preventDefault();
+          setModal(false)
+        },
+        closedirModal:e=>{
+          e.preventDefault();
+          setdirModal(false)
+        },
+        create: e => {
+          setToogleModal(true);
+          setSreateToggle(e);
+        },
+        publish: e => {
+          fetch("/api/items/publish", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ _id: e })
+          })
+            .then(res => res.json())
+            .then(res => {
+              console.log(res);
+              if (res.success) {
+                alert("published");
+              }
+            });
+        },
+        hide: e => {
+          setFilteredData(filteredData.filter(f => f._id !== e));
+        },
+        send: e => {
+          fetch("/sendajax", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ data: "value" })
+          }).then(res => {
+            console.log(res.status);
+          });
+        },
+        sendTo: e => {
+          setToggleDest(e);
+          setdirModal(true)
+        },
+        next: e => {
+          window.location.href = `/?${page + 1}`;
+        },
+        prev: e => {
+          window.location.href = `/?${page - 1}`;
+        }
+      };
+
+      function DestinationToggle() {
+        const [selectedDests, setSelectedDests] = React.useState([]);
+
+        function submitDestination() {
+          fetch("/api/destinations/selected", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ selectedDests, toggleDest })
+          }).then(res => {
+            console.log(res.status);
+          });
+        }
+
+        return (
+          <div className={dirModal?"preview":"nopreview"}>
+            {destinations.map(one => (
+              <div >
+                <p style={{width:"100%",textAlign:"center"}}>Send To : <span onClick={handleClick.closedirModal} style={{float:"right",fontSize:"22px",padding:"5px" ,marginLeft:"400px",fontSize:"28px", cursor:"pointer"}}>&#10007;</span> </p> 
+                <div style={{display:"flex",flexDirection:"row" , justifyContent:"center",alignItems:"center"}}>
+   
+                <input
+                  onChange={e => {
+                    if (e.currentTarget.checked) {
+                      setSelectedDests([...selectedDests, one]);
+                    } else {
+                      setSelectedDests(
+                        selectedDests.filter(e => e._id !== one._id)
+                      );
+                    }
+                  }}
+                  value={one._id}
+                  type="checkbox"
+                />
+                <p>{one.name}</p>
+                </div>
+              
+              </div>
+            ))}
+            <button style={{
+            margin:" 10px",
+  backgroundColor:" blue",
+  fontFamily:" 'Roboto Slab', serif",
+  fontSize:" 16px",
+  fontWeight:" 600",
+  color:" black",
+  border:" 1px solid black",
+  border:" none",
+  height:" 30px",
+  width:" 120px",
+  marginLeft:" 60px",
+  cursor:"pointer",
+  borderRadius:"6px",
+  marginTop:" 20px",
+          boxShadow:" 0 1px 5px rgba(104, 104, 104, 0.8)",
+          }} onClick={submitDestination}>Submit</button>
+          </div>
+        );
+      }
+
+      function EditToggle() {
+        return (
+          <form  style={{
+            padding:"15px",
+            display:"flex",
+            flexDirection:"column",
+            boxShadow:" 0 1px 5px rgba(104, 104, 104, 0.8)",
+            
+            
+          }} action="/api/items/edit" method="POST">
+         <p style={{padding:"5px",textAlign:"center",borderBottom:"1px solid grey"}}>Edit your values here</p>
+            <div style={{ display: "none" }}>
+              <input
+                name="_id"
+                defaultValue={editToggle}
+                className="form-control"
+              />
+            </div>
+            <div className="form-group">
+              <label style={{
+            padding:"20px",
+            color:"grey",
+            margin:"5px",
+            marginLeft:"10px",
+            top:"5px"
+
+          }}  >Name</label>
+              <input style={{
+            padding:"5px",
+            margin:"5px",
+            height:"24px",
+            width:"450px",
+            borderRadius:"6px",
+            margiLeft:"10px",
+            float:"right"
+
+          }} 
+                name="name"
+                defaultValue={data.find(e => e._id === editToggle).name}
+                className="form-control"
+              />
+            </div>
+            <div className="form-group">
+              <label style={{
+            padding:"20px",
+            color:"grey",
+            margin:"5px",
+            marginLeft:"10px",
+            top:"5px"
+
+          }}  >Description</label>
+              <input style={{
+            padding:"5px",
+            margin:"5px",
+            height:"24px",
+            width:"450px",
+            borderRadius:"6px",
+            margiLeft:"10px",
+            float:"right"
+
+          }} 
+                name="description"
+                defaultValue={data.find(e => e._id === editToggle).description}
+                className="form-control"
+              />
+            </div>
+            <div className="form-group">
+              <label style={{
+            padding:"20px",
+            color:"grey",
+            margin:"5px",
+            marginLeft:"10px",
+            top:"5px"
+
+          }}  >Instructions</label>
+              <input style={{
+            padding:"5px",
+            margin:"5px",
+            height:"24px",
+            width:"450px",
+            borderRadius:"6px",
+            margiLeft:"10px",
+            float:"right"
+
+          }} 
+                name="instructions"
+                defaultValue={data.find(e => e._id === editToggle).instructions}
+                className="form-control"
+              />
+            </div>
+            <div className="form-group">
+              <label style={{
+            padding:"20px",
+            color:"grey",
+            margin:"5px",
+            marginLeft:"10px",
+            top:"5px"
+
+          }} >channel</label>
+              <input style={{
+            padding:"5px",
+            margin:"5px",
+            height:"24px",
+            width:"450px",
+            borderRadius:"6px",
+            margiLeft:"10px",
+            float:"right"
+
+          }} 
+                name="channel"
+                defaultValue={data.find(e => e._id === editToggle).channel}
+                className="form-control"
+              />
+            </div>
+            <div className="form-group">
+              <label style={{
+            padding:"20px",
+            color:"grey",
+            margin:"5px",
+            marginLeft:"10px",
+            top:"5px"
+
+          }}  >Category</label>
+              <input style={{
+            padding:"5px",
+            margin:"5px",
+            height:"24px",
+            width:"450px",
+            borderRadius:"6px",
+            margiLeft:"10px",
+            float:"right"
+
+          }} 
+                name="category"
+                defaultValue={data.find(e => e._id === editToggle).category}
+                className="form-control"
+              />
+            </div>
+            <div className="form-group">
+              <label style={{
+            padding:"20px",
+            color:"grey",
+            margin:"5px",
+            marginLeft:"10px",
+            top:"5px"
+
+          }} >width</label>
+              <input style={{
+            padding:"5px",
+            margin:"5px",
+            height:"24px",
+            width:"450px",
+            borderRadius:"6px",
+            margiLeft:"10px",
+            float:"right"
+
+          }} 
+                name="width"
+                defaultValue={data.find(e => e._id === editToggle).width}
+                className="form-control"
+              />
+            </div>
+            <div className="form-group">
+              <label style={{
+            padding:"20px",
+            color:"grey",
+            margin:"5px",
+            marginLeft:"10px",
+            top:"5px"
+
+          }}  >height</label>
+              <input style={{
+            padding:"5px",
+            margin:"5px",
+            height:"24px",
+            width:"450px",
+            borderRadius:"6px",
+            margiLeft:"10px",
+            float:"right"
+
+          }} 
+                name="height"
+                defaultValue={data.find(e => e._id === editToggle).height}
+                className="form-control"
+              />
+            </div>
+            <div className="form-group">
+              <label style={{
+            padding:"20px",
+            color:"grey",
+            margin:"5px",
+            marginLeft:"10px",
+            top:"5px"
+
+          }}  >Tags</label>
+              <input style={{
+            padding:"5px",
+            margin:"5px",
+            height:"24px",
+            width:"450px",
+            borderRadius:"6px",
+            margiLeft:"10px",
+            float:"right"
+
+          }} 
+                name="tags"
+                defaultValue={data.find(e => e._id === editToggle).tags}
+                className="form-control"
+              />
+            </div>
+            <button  style={{
+            margin:" 10px",
+  backgroundColor:" blue",
+  fontFamily:" 'Roboto Slab', serif",
+  fontSize:" 16px",
+  fontWeight:" 600",
+  color:" white",
+  border:" 1px solid black",
+  border:" none",
+  height:" 40px",
+  width:" 220px",
+  marginLeft:" 60px",
+  cursor:"pointer",
+  borderRadius:"6px",
+  marginTop:" 20px",
+          boxShadow:" 0 1px 5px rgba(104, 104, 104, 0.8)",
+          }}  type="submit" className="btn btn-primary">
+              Submit
+            </button>
+            <button style={{
+            margin:" 10px",
+  backgroundColor:"red",
+  fontFamily:" 'Roboto Slab', serif",
+  fontSize:" 16px",
+  fontWeight:" 600",
+  color:" white",
+  border:" 1px solid black",
+  border:" none",
+  height:" 40px",
+  width:" 220px",
+  marginLeft:" 60px",
+  cursor:"pointer",
+  borderRadius:"6px",
+  marginTop:" 10px",
+          boxShadow:" 0 1px 5px rgba(104, 104, 104, 0.8)",
+          }} type="submit" onClick={handleClick.editclose} className="btn btn-primary">
+         Exit
+            </button>
+            <br />
+            <hr />
+          </form>
+        );
+      }
+      function SreateToggle() {
+       console.log(toogleModal);
+        return (   
+
+          <form  style={{
+            padding:"5px",
+            display:"flex",
+            flexDirection:"column",
+            boxShadow:" 0 1px 5px rgba(104, 104, 104, 0.8)",
+            
+            
+          }} action="/api/items/ADD "   method="POST">
+            <div style={{
+            padding:"5px"
+          }} className="form-group">
+          <p style={{textAlign:"center"}}>Add new items</p>
+              <label style={{
+            padding:"20px",
+            color:"grey",
+            margin:"5px",
+            marginLeft:"10px",
+            top:"5px"
+
+          }}>Name</label>
+              <input style={{
+            padding:"5px",
+            margin:"5px",
+            height:"24px",
+            width:"300px",
+            borderRadius:"6px",
+            margiLeft:"10px",
+            float:"right"
+
+          }}  name="name" className="form-control" />
+            </div>
+            <div style={{
+            padding:"5px"
+          }} className="form-group">
+              <label style={{
+            padding:"20px",
+            color:"grey",
+            margin:"5px",
+            marginLeft:"10px",
+            top:"5px"
+
+          }}>Description</label>
+              <input style={{
+            padding:"5px",
+            margin:"5px",
+            height:"24px",
+            width:"300px",
+            borderRadius:"6px",
+            margiLeft:"10px",
+            float:"right"
+
+          }}  name="description" className="form-control" />
+            </div>
+            <div style={{
+            padding:"5px"
+          }} className="form-group">
+              <label style={{
+            padding:"20px",
+            color:"grey",
+            margin:"5px",
+            marginLeft:"10px",
+            top:"5px"
+
+          }}>Instructions</label>
+              <input style={{    
+            padding:"5px",
+            margin:"5px",
+            borderRadius:"6px",
+            float:"right",
+            height:"24px",
+            width:"300px"
+
+          }}  name="instructions" className="form-control" />
+            </div>
+            <div style={{
+            padding:"5px"
+          }} className="form-group">
+              <label style={{
+            padding:"20px",
+            color:"grey",
+            margin:"5px",
+            marginLeft:"10px",
+            top:"5px"
+
+          }}>Channel</label>
+              <input style={{
+            padding:"5px",
+            margin:"5px",
+            height:"24px",
+            width:"300px",
+            borderRadius:"6px",
+            margiLeft:"10px",
+            float:"right"
+
+          }}  name="channel" className="form-control" />
+            </div>
+            <div style={{
+            padding:"5px"
+          }} className="form-group">
+              <label style={{
+            padding:"20px",
+            color:"grey",
+            margin:"5px",
+            marginLeft:"10px",
+            top:"5px"
+
+          }}>Category</label>
+              <input style={{
+            padding:"5px",
+            margin:"5px",
+            height:"24px",
+            width:"300px",
+            borderRadius:"6px",
+            margiLeft:"10px",
+            float:"right"
+
+          }}  name="category" className="form-control" />
+            </div>
+            <div style={{
+            padding:"5px"
+          }} className="form-group">
+              <label style={{
+            padding:"20px",
+            color:"grey",
+            margin:"5px",
+            marginLeft:"10px",
+            top:"5px"
+
+          }}>Width</label>
+              <input style={{
+            padding:"5px",
+            margin:"5px",
+            height:"24px",
+            width:"300px",
+            borderRadius:"6px",
+            margiLeft:"10px",
+            float:"right"
+
+          }}  name="width" className="form-control" />
+            </div>
+            <div style={{
+            padding:"5px"
+          }} className="form-group">
+              <label style={{
+            padding:"20px",
+            color:"grey",
+            margin:"5px",
+            marginLeft:"10px",
+            top:"5px"
+
+          }}>Height</label>
+              <input style={{
+            padding:"5px",
+            margin:"5px",
+            height:"24px",
+            width:"300px",
+            borderRadius:"6px",
+            margiLeft:"10px",
+            float:"right"
+
+          }}  name="height" className="form-control" />
+            </div>
+            <div style={{
+            padding:"5px"
+          }} className="form-group">
+              <label style={{
+            padding:"20px",
+            color:"grey",
+            margin:"5px",
+            marginLeft:"10px",
+            top:"5px"
+
+          }}>Tags</label>
+              <input style={{
+            padding:"5px",
+            margin:"5px",
+            height:"24px",
+            width:"300px",
+            borderRadius:"6px",
+            margiLeft:"10px",
+            float:"right"
+
+          }}  name="tags" className="form-control" />
+            </div>
+            <button style={{
+            margin:" 10px",
+  backgroundColor:" blue",
+  fontFamily:" 'Roboto Slab', serif",
+  fontSize:" 16px",
+  fontWeight:" 600",
+  color:" white",
+  border:" 1px solid black",
+  border:" none",
+  height:" 40px",
+  width:" 220px",
+  marginLeft:" 60px",
+  cursor:"pointer",
+  borderRadius:"6px",
+  marginTop:" 20px",
+          boxShadow:" 0 1px 5px rgba(104, 104, 104, 0.8)",
+          }} type="submit" className="btn btn-primary">
+              Submit
+            </button>
+            <button style={{
+            margin:" 10px",
+  backgroundColor:"red",
+  fontFamily:" 'Roboto Slab', serif",
+  fontSize:" 16px",
+  fontWeight:" 600",
+  color:" white",
+  border:" 1px solid black",
+  border:" none",
+  height:" 40px",
+  width:" 220px",
+  marginLeft:" 60px",
+  cursor:"pointer",
+  borderRadius:"6px",
+  marginTop:" 10px",
+          boxShadow:" 0 1px 5px rgba(104, 104, 104, 0.8)",
+          }} type="submit" onClick={handleClick.close} className="btn btn-primary">
+            Close
+            </button>
+            <br />
+            <hr />
+          </form>
+        );
+      }
+
+      function ViewToggle() {
+        return (
+          <div style={{marginTop:"-35px",overflow:"hidden"}} className={Modal?'preview':'nopreview'} >
+            <p className="previewpara">Preview <span onClick={handleClick.closeModal} style={{float:"right",fontSize:"22px",padding:"5px" , cursor:"pointer"}}>&#10007;</span></p>
+            <p>Name: {data.find(e => e._id === viewToggle).name}</p>
+            <p>Channel: {data.find(e => e._id === viewToggle).channel}</p>
+            <p>
+              Description: {data.find(e => e._id === viewToggle).description}
+            </p>
+            <p>Category: {data.find(e => e._id === viewToggle).category}</p>
+            <p>Tags: {data.find(e => e._id === viewToggle).tags.join(", ")}</p>
+            <p>Height: {data.find(e => e._id === viewToggle).height}</p>
+            <p>Width: {data.find(e => e._id === viewToggle).width}</p>
+            <br />
+            <hr />
+          </div>
+        );
+      }
+
+      return (
+        <div>
+          {edittoogleModal &&  editToggle && <EditToggle />}
+          {toogleModal && sreateToggle && <SreateToggle />}
+          {Modal && viewToggle && <ViewToggle />}
+          { dirModal && toggleDest && <DestinationToggle />}
+
+        { !edittoogleModal && !toogleModal &&  <select style={{  height: "36px",
+  width: "180px",
+  textIndent:"5px",
+  outline: "none",
+  padding:"5px",
+  border: "0.2px solid #ffb606"}}  onChange={handleChange.filter}>
+            <option value="-All-">-All-</option>
+            {filterOptions.map((option, i) => (
+              <option key={i} value={option}>
+                {option}
+              </option>
+            ))}
+          </select> }
+         {!edittoogleModal && !toogleModal && <button style={{
+            margin:" 10px",
+  backgroundColor:" blue",
+  fontFamily:" 'Roboto Slab', serif",
+  fontSize:" 16px",
+  fontWeight:" 600",
+  color:"white ",
+  border:" 1px solid black",
+  border:" none",
+  height:" 40px",
+  width:" 220px",
+  marginLeft:" 60px",
+  cursor:"pointer",
+  borderRadius:"6px",
+  marginTop:" 20px",
+          boxShadow:" 0 1px 5pADD Ix rgba(104, 104, 104, 0.8)",
+          }} onClick={handleClick.create}>Add item</button> }
+          <hr />
+          { !edittoogleModal && !toogleModal && filteredData.map(item => (
+            <div className="card" key={item._id}>
+              <span>
+                <p style={{fontWeight:"bold"}}>{item.name}</p>
+                <p style={{fontStyle:"italic",color:"grey"}}> {item.channel}</p>
+              </span>
+              <p>{item.description}</p>
+              <p>Category: {item.category}</p>
+              <p>tags: {item.tags.join(", ")}</p>
+              <br />
+
+              <button className='cardButton' onClick={() => handleClick.preview(item._id)}>
+                Preview
+              </button>
+              <button className='cardButton' onClick={() => handleClick.edit(item._id)}>Edit</button>
+              <button className='cardButton' onClick={() => handleClick.publish(item._id)}>
+                Publish
+              </button>
+              <button className='cardButton' onClick={() => handleClick.hide(item._id)}>Hide</button>
+              <button className='cardButton' onClick={handleClick.send}>Send</button>
+              <button className='cardButton' onClick={() => handleClick.sendTo(item._id)}>
+                Send To
+              </button>
+            </div>
+          ))}
+          <hr />
+    
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById("root"));
+  </script>
+</html>

@@ -1,0 +1,16 @@
+{
+  "env": {
+    "PROJECT_NAME": "adiian",
+    "PROJECT_NAME_LONG": "adiian",
+    "DOMAIN_NAME": "localhost",
+    "DEPLOYMENT": false,
+    "PROJECT_URL": "http://localhost:9090",
+    "MONGO_URL": "mongodb://localhost:27017/adiian",
+    "PROJECT_PORT": "9090",
+    "ADMIN_PASSWORD": "hellohello",
+    "JWT_KEY": "secret",
+    "JWT_TTL": "2592000000",
+    "COOKIE_REFRESH_TIME": "604800"
+  },
+  "ignore": ["public/**"]
+}

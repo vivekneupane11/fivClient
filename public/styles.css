@@ -1,0 +1,121 @@
+*{
+  font-family: 'Roboto Slab', serif;
+}
+body {
+  max-width: 140rem;
+  padding: 0 15rem;
+  margin: 1rem auto;
+  font-family: 'Roboto Slab', serif;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.card {
+  background: #FFEFBA;  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to right, #FFFFFF, #FFEFBA);  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #FFFFFF, #FFEFBA); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  border-radius:10px;
+  padding: 1.5em;
+  margin: 0.5em;
+  box-shadow: 0 1px 5px rgba(104, 104, 104, 0.8);
+
+  
+}
+.cardButton{
+  padding:6px;
+  -webkit-box-shadow: 0 1px 5px rgba(104, 104, 104, 0.8);
+  box-shadow: 0 1px 5px rgba(104, 104, 104, 0.8);
+  background: #FFEFBA;  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to right, #FFFFFF, #FFEFBA);  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #FFFFFF, #FFEFBA); 
+  border:none;
+  height:30px;
+  width:100px;
+  cursor:pointer;
+
+}
+.header{
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+
+ padding: 5px;
+}
+.form{
+  background-color:violet;
+box-shadow: 0 1px 5px rgba(104, 104, 104, 0.8);
+  align-self: center;
+}
+.form-control{
+  box-shadow: 0 1px 5px rgba(104, 104, 104, 0.8);
+  outline: none;
+  border: none;
+}
+.button{
+  margin: 10px;
+  background-color: #ffee00;
+  font-family: 'Roboto Slab', serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: black;
+  border: 1px solid black;
+  border: none;
+  height: 40px;
+  width: 220px;
+  margin-left: 60px;
+  margin-top: 20px;
+  -webkit-box-shadow: 0 1px 5px rgba(104, 104, 104, 0.8);
+          box-shadow: 0 1px 5px rgba(104, 104, 104, 0.8);
+}
+.select{
+  height: 36px;
+  width: 280px;
+  text-indent: 5px;
+  outline: none;
+  border: 0.2px solid #ffb606;
+}
+.preview{
+  margin:10px;
+  box-sizing: border-box;
+  display:flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position:absolute;
+  width:600px;
+  background: #ADA996;  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to right, #EAEAEA, #DBDBDB, #F2F2F2, #ADA996);  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #EAEAEA, #DBDBDB, #F2F2F2, #ADA996); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  border-radius: 12px;  
+  box-shadow: 0px 0px 1px 5000px rgba(0,0,0,0.8);
+ margin-top:25px;
+}
+.previewpara{
+  display:block;
+  width:600px;
+  overflow:hidden;
+  padding:12px;
+  color:white;
+  font-weight: bold;
+  text-align: center;
+  background: #396afc;  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to right, #2948ff, #396afc);  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #2948ff, #396afc); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+ 
+}
+.nopreview{
+  display:none;
+}
+/* <div>
+<p>Page No.: {pageOptions.currentPage}</p>
+{pageOptions.pages < 1 && (
+  <button onClick={handleClick.prev}>Previous</button>
+)}
+{!ispageOptions.pages >= 1 && (
+  <button onClick={handleClick.next}>Next</button>
+)}
+</div> -- */
